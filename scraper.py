@@ -1,3 +1,6 @@
+# This small scraper aims to scrape relative data of sponser relatives. 
+#
+#
 # Initiation
 from selenium import webdriver
 from time import sleep
@@ -6,6 +9,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import urllib
 import requests
+
 
 if __name__ == '__main__': 
 
