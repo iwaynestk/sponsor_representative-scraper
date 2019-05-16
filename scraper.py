@@ -34,6 +34,7 @@ if __name__ == '__main__':
     now_handle = all_handles[1]
     driver.switch_to.window(now_handle)
 
+
     # Now we would like to get the url of this page. And ... at least get some basic imformation of this window, like how many pages are listed for this organization. 
     currentUrl = driver.current_url
     print(currentUrl)
@@ -46,10 +47,13 @@ if __name__ == '__main__':
 
     # We start from page 1. 
     nuOfCurrentPage = 1
+
+
     while (nuOfCurrentPage <= nuOfPages): 
         print(nuOfCurrentPage)
         sleep(2)
         
+
         # In this loop, we would open the links on this page one by one. After each iteration, we would close the window we just opened and then return to the previous window. 
         for loop_num in range(1, 100): 
             # Click on the page we just opened
@@ -58,9 +62,11 @@ if __name__ == '__main__':
             now_handle = all_handles[2]
             driver.switch_to.window(now_handle)
 
+
             # Then we do some scraping here. Now we would like to close this window and go for the next window. 
             # Scraping
             sleep(2)
+
 
             #Close the current window and go back to the previous window
             driver.close()
@@ -71,6 +77,7 @@ if __name__ == '__main__':
 
         # We would click here to go to the next page. 
         driver.find_element_by_css_selector(".ui-icon.ui-icon-seek-next").click()
+        
 
         # After getting to the next page, current page number should plus 1. Then we would go back to the start of this while loop. 
         nuOfCurrentPage = nuOfCurrentPage + 1
