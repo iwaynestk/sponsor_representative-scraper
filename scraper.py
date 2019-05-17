@@ -7,6 +7,7 @@ from time import sleep
 import os
 from bs4 import BeautifulSoup
 import requests
+import pandas as pd
 
 
 if __name__ == '__main__': 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
         # The name of the organization is stored in org_name
         # The row we are looking at is nuOfCurrentRow
         org_name = driver.find_element_by_xpath("""/html/body/div/table[3]/tbody[2]/tr[%d]/td[2]""" % nuOfCurrentRow).text
-        print(org_name)
+        print("We are currently dealing with sponsors from " + org_name)
 
 
         # Now we would click on the link to jump to the list that has all the information of the sponsers. 
@@ -45,7 +46,6 @@ if __name__ == '__main__':
 
 
         # Now we would like to get the url of this page. And ... at least get some basic imformation of this window, like how many pages are listed for this organization. 
-        currentUrl = driver.current_url
         html = driver.page_source
         soup = BeautifulSoup(html, "lxml")
         nuOfPages_text = soup.find("span", id="sp_1").text
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
         while (nuOfCurrentPage <= nuOfPages): 
-            print(nuOfCurrentPage)
+            print("We are currently on ", nuOfCurrentPage)
             sleep(3)
             
 
@@ -71,6 +71,9 @@ if __name__ == '__main__':
                 driver.switch_to.window(now_handle)
 
 
+                currentUrl = driver.current_url
+                
+                
                 # Then we do some scraping here. Now we would like to close this window and go for the next window. 
                 # Scraping
                 # ...
