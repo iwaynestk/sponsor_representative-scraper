@@ -1,6 +1,7 @@
 # This file is a seperate program which would extract the information from the last layer. 
-
-
+#
+#
+#
 from selenium import webdriver
 from time import sleep
 import os
@@ -37,10 +38,18 @@ from selenium.webdriver.chrome.options import Options
 # url = "http://exam.sac.net.cn/pages/registration/sac-finish-person.html?r2SS_IFjjk=88F25848CAB4167BE053D651A8C0611C"
 # scrapeInfo(url)
 
-html_path = "C:/Users/iwayn/Developer/py_spiders/sac-finish-person.html"
+
+
+# In this part, I am simply trying to do everything locally. 
+html_path = "sac-finish-person.html"
 html_file = open(html_path, 'r', encoding = 'utf-8')
 htmlhandle = html_file.read()
 soup = BeautifulSoup(htmlhandle, 'lxml')
+
+
+sponser_name = soup.findAll("td")[2].text
+print(sponser_name)
+
 
 table = soup.findAll("table")[-1]
 table_rows = table.findAll("tr")
