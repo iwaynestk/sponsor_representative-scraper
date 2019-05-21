@@ -20,16 +20,6 @@ from selenium.common.exceptions import UnexpectedAlertPresentException
 
 
 
-# # This function would check if the element exists in the page
-# def check_exists_by_xpath(xpath):
-#     try:
-#         driver.find_element_by_xpath(xpath)
-#     except NoSuchElementException:
-#         return False
-#     return True
-
-
-
 
 # This function would scrap the information of the sponser from the last layer
 def scrapInfo(org_name): 
@@ -91,113 +81,101 @@ def scrapInfo(org_name):
 if __name__ == '__main__': 
 
 
-    # Proxy server
-    proxyHost = "http-dyn.abuyun.com"
-    proxyPort = "9020"
+    # # Proxy server
+    # proxyHost = "http-dyn.abuyun.com"
+    # proxyPort = "9020"
 
-    # Proxy tunnel
-    proxyUser = "HD3H9MO48ZJZ917D"
-    proxyPass = "0F1A23458DAC4C5C"
+    # # Proxy tunnel
+    # proxyUser = "HD3H9MO48ZJZ917D"
+    # proxyPass = "0F1A23458DAC4C5C"
 
-    def create_proxy_auth_extension(proxy_host, proxy_port,
-                                   proxy_username, proxy_password,
-                                   scheme='http', plugin_path=None):
-        if plugin_path is None:
-            plugin_path = r'./{}_{}@http-dyn.abuyun.com_9020.zip'.format(proxy_username, proxy_password)
+    # def create_proxy_auth_extension(proxy_host, proxy_port,
+    #                                proxy_username, proxy_password,
+    #                                scheme='http', plugin_path=None):
+    #     if plugin_path is None:
+    #         plugin_path = r'./{}_{}@http-dyn.abuyun.com_9020.zip'.format(proxy_username, proxy_password)
 
-        manifest_json = """
-        {
-            "version": "1.0.0",
-            "manifest_version": 2,
-            "name": "Abuyun Proxy",
-            "permissions": [
-                "proxy",
-                "tabs",
-                "unlimitedStorage",
-                "storage",
-                "<all_urls>",
-                "webRequest",
-                "webRequestBlocking"
-            ],
-            "background": {
-                "scripts": ["background.js"]
-            },
-            "minimum_chrome_version":"22.0.0"
-        }
-        """
+    #     manifest_json = """
+    #     {
+    #         "version": "1.0.0",
+    #         "manifest_version": 2,
+    #         "name": "Abuyun Proxy",
+    #         "permissions": [
+    #             "proxy",
+    #             "tabs",
+    #             "unlimitedStorage",
+    #             "storage",
+    #             "<all_urls>",
+    #             "webRequest",
+    #             "webRequestBlocking"
+    #         ],
+    #         "background": {
+    #             "scripts": ["background.js"]
+    #         },
+    #         "minimum_chrome_version":"22.0.0"
+    #     }
+    #     """
 
-        background_js = string.Template(
-            """
-            var config = {
-                mode: "fixed_servers",
-                rules: {
-                    singleProxy: {
-                        scheme: "${scheme}",
-                        host: "${host}",
-                        port: parseInt(${port})
-                    },
-                    bypassList: ["foobar.com"]
-                }
-              };
+    #     background_js = string.Template(
+    #         """
+    #         var config = {
+    #             mode: "fixed_servers",
+    #             rules: {
+    #                 singleProxy: {
+    #                     scheme: "${scheme}",
+    #                     host: "${host}",
+    #                     port: parseInt(${port})
+    #                 },
+    #                 bypassList: ["foobar.com"]
+    #             }
+    #           };
 
-            chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+    #         chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
 
-            function callbackFn(details) {
-                return {
-                    authCredentials: {
-                        username: "${username}",
-                        password: "${password}"
-                    }
-                };
-            }
+    #         function callbackFn(details) {
+    #             return {
+    #                 authCredentials: {
+    #                     username: "${username}",
+    #                     password: "${password}"
+    #                 }
+    #             };
+    #         }
 
-            chrome.webRequest.onAuthRequired.addListener(
-                callbackFn,
-                {urls: ["<all_urls>"]},
-                ['blocking']
-            );
-            """
-        ).substitute(
-            host=proxy_host,
-            port=proxy_port,
-            username=proxy_username,
-            password=proxy_password,
-            scheme=scheme,
-        )
+    #         chrome.webRequest.onAuthRequired.addListener(
+    #             callbackFn,
+    #             {urls: ["<all_urls>"]},
+    #             ['blocking']
+    #         );
+    #         """
+    #     ).substitute(
+    #         host=proxy_host,
+    #         port=proxy_port,
+    #         username=proxy_username,
+    #         password=proxy_password,
+    #         scheme=scheme,
+    #     )
 
-        with zipfile.ZipFile(plugin_path, 'w') as zp:
-            zp.writestr("manifest.json", manifest_json)
-            zp.writestr("background.js", background_js)
+    #     with zipfile.ZipFile(plugin_path, 'w') as zp:
+    #         zp.writestr("manifest.json", manifest_json)
+    #         zp.writestr("background.js", background_js)
 
-        return plugin_path
+    #     return plugin_path
 
-    proxy_auth_plugin_path = create_proxy_auth_extension(
-        proxy_host=proxyHost,
-        proxy_port=proxyPort,
-        proxy_username=proxyUser,
-        proxy_password=proxyPass)
+    # proxy_auth_plugin_path = create_proxy_auth_extension(
+    #     proxy_host=proxyHost,
+    #     proxy_port=proxyPort,
+    #     proxy_username=proxyUser,
+    #     proxy_password=proxyPass)
 
     options = webdriver.ChromeOptions()
 
-    options.add_argument("--start-maximized")
-    options.add_extension(proxy_auth_plugin_path)
+    # options.add_argument("--start-maximized")
+    # options.add_extension(proxy_auth_plugin_path)
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
-
+    options.add_argument('lang=zh_CN.UTF-8')
+    options.add_argument('user-agent="Mozilla/5.0 (iPod; U; CPU iPhone OS 2_1 like Mac OS X; ja-jp) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5F137 Safari/525.20"')
     driver = webdriver.Chrome(chrome_options=options)
-
-
-
-
-    # # Open up a Chrome browser and navigate to web page. 
-    # driver = webdriver.Chrome()
-
-
-    # options = webdriver.ChromeOptions()
-    # options.add_argument('lang=zh_CN.UTF-8')
-    # options.add_argument('user-agent="Mozilla/5.0 (iPod; U; CPU iPhone OS 2_1 like Mac OS X; ja-jp) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5F137 Safari/525.20"')
-    # driver = webdriver.Chrome(chrome_options=options)
-
 
 
     driver.get("http://exam.sac.net.cn/pages/registration/sac-publicity-report.html")
@@ -206,7 +184,7 @@ if __name__ == '__main__':
 
 
     # We start form the first row, which corresponds to the first organization. 
-    nuOfCurrentRow = 1
+    nuOfCurrentRow = 23
 
 
     while (nuOfCurrentRow <= 121): 
@@ -218,7 +196,7 @@ if __name__ == '__main__':
         print("We are currently dealing with sponsors from " + org_name)
 
 
-        # Now we would click on the link to jump to the list that has all the information of the sponsers. 
+        # Now we would click on the link to jump to the page that shows the list of the sponsers. 
         driver.find_element_by_xpath("""/html/body/div/table[3]/tbody[2]/tr[%d]/td[10]/a""" % nuOfCurrentRow).click()
 
 
