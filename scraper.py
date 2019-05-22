@@ -30,19 +30,15 @@ def scrapInfo(org_name):
     html_sponsor = driver.page_source
     soup_sponsor = BeautifulSoup(html_sponsor, "lxml")
 
-
     sponser_name = soup_sponsor.findAll("td")[2].text
     print("Scraping the information of ", sponser_name)
-
 
     # Assign the name the organization to variable current_org
     current_org = org_name
 
-
     # Locate the big chunky table
     table = soup_sponsor.findAll("table")[-1]
     table_rows = table.findAll("tr")
-
 
     # Go over this table and fill the information in each row into 'l'
     l = []
@@ -51,14 +47,12 @@ def scrapInfo(org_name):
         row = [tr.text for tr in td]
         l.append(row)
 
-
     # Throw away the first 2 rows of 'l'
     l = l[2:]
     # Transfer l to a dataframe
     df = pd.DataFrame(l, columns = ["ID", "date_certificate", "org", "position", "status", "filing_date"])
     df['current_org'] = current_org
     df['sponser_name'] = sponser_name
-
 
     # Download and rename the picture
     img = soup_sponsor.findAll('img')[1]
@@ -186,14 +180,11 @@ def main():
         org_name = driver.find_element_by_xpath("""/html/body/div/table[3]/tbody[2]/tr[%d]/td[2]""" % nuOfCurrentRow).text
         print("We are currently dealing with sponsors from " + org_name)
 
-
         # Now we would click on the link to jump to the page that shows the list of the sponsers. 
         driver.find_element_by_xpath("""/html/body/div/table[3]/tbody[2]/tr[%d]/td[10]/a""" % nuOfCurrentRow).click()
 
-
         driver.switch_to.window(driver.window_handles[-1])
         sleep(1)
-
 
         # Now let's see how many sponsors are listed for this organization
         nuOfPages_text = driver.find_element_by_xpath("""//*[@id="sp_1"]""").text
@@ -201,36 +192,29 @@ def main():
         nuOfPages = int(nuOfPages_text)
         print(nuOfPages, " page(s) for this organization")
 
-
         # We start from page 1. 
         nuOfCurrentPage = 1
-
 
         # Create an empty dataframe with default column names
         df_org = pd.DataFrame(columns = ['ID', 'date_certificate', 'org', 'position', 'filing_date', 'current_org', 'sponser_name'])
 
-
         while (nuOfCurrentPage <= nuOfPages): 
             print("We are currently on page", nuOfCurrentPage)
-
 
             nuOfSponsers_seg = driver.find_element_by_xpath("""//*[@id="pager_right"]/div""").text
             nuOfSponsers = nuOfSponsers_seg.split(" ")[-2]
             print(nuOfSponsers, " sponser(s) on this page")
             
-
             # In this loop, we would open the links on the page of this organization one by one. After each iteration, we would close the window we just opened and then return to the previous window. 
             loop_num = 1
             while (loop_num <= int(nuOfSponsers)): 
-
                 try: 
-
                     # Click on the page we just opened to see the detailed information of this specific sponser
                     driver.find_element_by_xpath("""//*[@id="%s"]/td[2]/a""" % loop_num).click()
                     driver.switch_to.window(driver.window_handles[2])
 
                     # Then we do some scraping here with the function scrapInfo()
-                    sleep(2)
+                    sleep(1)
                     df_sponsor = scrapInfo(org_name)
                     df_org = df_org.append(df_sponsor, ignore_index=True)
 
@@ -241,9 +225,7 @@ def main():
                     loop_num += 1
 
                 except: 
-
                     pass
-
                     # record url
                     exception_url = driver.current_url
                     print("Something went wrong on this page: ", exception_url)
@@ -251,18 +233,12 @@ def main():
                     exception_file.write(exception_url)
                     exception_file.close()
 
-                    #Close the current window and go back to the previous window
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[-1])
-
-                    loop_num += 1
-
-                    continue
+                    driver.switch_to.alert.accept()
+                    driver.refresh()
 
 
             # We would click here to go to the next page. 
             driver.find_element_by_css_selector(".ui-icon.ui-icon-seek-next").click()
-            
 
             # After getting to the next page, current page number should plus 1. Then we would go back to the start of this while loop. 
             nuOfCurrentPage += 1
@@ -276,9 +252,7 @@ def main():
         driver.close()
         driver.switch_to.window(driver.window_handles[-1])
 
-
         nuOfCurrentRow = nuOfCurrentRow + 1
-
 
 
     # Close browser once task is completed
