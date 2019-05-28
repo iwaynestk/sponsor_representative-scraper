@@ -10,7 +10,8 @@ headers = {
     "Content-Type": "application/x-www-form-urlencoded", 
     "Accept-Encoding": "gzip, deflate", 
     "Host": "exam.sac.net.cn", 
-    "Origin": "http://exam.sac.net.cn"
+    "Origin": "http://exam.sac.net.cn", 
+    "X-Requested-With": "XMLHttpRequest"
 }
 
 def get_nu_of_pages(nu_sponsor):
@@ -49,7 +50,7 @@ def get_info_of_org(org_info):
         org_result = org_data["result"]
         for sponsor in org_result: 
             d = {}
-            d["sponsor_ID"] = sponsor["PPP_ID"]
+            d["sponsor_PPP_ID"] = sponsor["PPP_ID"]
             d["sponsor_name"] = sponsor["RPI_NAME"]
             d["sponsor_org"] = sponsor["AOI_NAME"]
             d["sponsor_certificate"] = sponsor["CER_NUM"]
@@ -64,7 +65,52 @@ def get_info_of_org(org_info):
     with open(file_org, "w", encoding='utf-8') as orgout: 
         json.dump(org_list, orgout, ensure_ascii = False)
 
+    return org_list
 
+
+def get_RPI_ID(sponsor_info): 
+
+    sponsor_post_data_PPP = {
+        "filter_EQS_PPP_ID": sponsor_info["sponsor_PPP_ID"], 
+        "sqlkey": "registration", 
+        "sqlval": "SD_A02Leiirkmuexe_b9ID"
+    }
+
+    sponsor_PPP_url  = "http://exam.sac.net.cn/pages/registration/train-line-register!gsUDDIsearch.action"
+    sponsor_PPP_req = requests.post(url = sponsor_PPP_url, data = sponsor_post_data_PPP, headers = headers)
+    RPI_ID = sponsor_PPP_req.json()[0]["RPI_ID"]
+
+    return RPI_ID
+
+
+def get_hist_table(RPI_ID):
+
+    sponsor_post_data_RPI = {
+        "filter_EQS_RH#RPI_ID": RPI_ID, 
+        "sqlkey": "registration", 
+        "sqlval": "SEARCH_LIST_BY_PERSONWWCX"
+    }
+
+    sponsor_RPI_work_history_url = "http://exam.sac.net.cn/pages/registration/train-line-register!gsUDDIsearch.action"
+    sponsor_history_req = requests.post(url = sponsor_RPI_work_history_url, data = sponsor_post_data_RPI, headers = headers)
+    sponsor_history_data = sponsor_history_req.json()
+    return sponsor_history_data
+
+def get_image(RPI_ID):  
+
+    image_post_data = {
+        "filter_EQS_RPI_ID": RPI_ID, 
+        "sqlkey": "registration", 
+        "sqlval": "SELECT_PERSON_INFO"
+    }
+
+    image_page_url = "http://exam.sac.net.cn/pages/registration/train-line-register!gsUDDIsearch.action"
+    image_req = requests.post(url = image_page_url, data = image_post_data, headers = headers)
+    image_data = image_req.json()
+    image_url = "http://exam.sac.net.cn/photo/images/" + image_data[0]["RPI_PHOTO_PATH"]
+    print(image_url)
+    image_name = image_data["AOI_NAME"] + "_" + image_data["RPI_NAME"] + ".jpg"
+    urllib.request.urlretrieve(image_url, image_name)
 
 
 
@@ -94,18 +140,31 @@ for org in main_data:
 # with open("main_info.txt", "w", encoding='utf-8') as fout: 
 #     json.dump(main_data_list, fout, ensure_ascii = False)
 
+
 for org in main_data_list: 
-    try: 
-        print("Checking out ", org["org_name"])
-        get_info_of_org(org)
-    except Exception as e: 
-        print(e)
-        continue
+
+    print("Checking out ", org["org_name"])
+    sponsors = get_info_of_org(org)
+
+    work_hist = []
+
+    for sponsor in sponsors: 
+
+        try: 
+            RPI_ID = get_RPI_ID(sponsor)
+            print("Checking out sponsor: ", sponsor["sponsor_name"], " RPI_ID: ", RPI_ID)
+            work_hist.append(get_hist_table(RPI_ID))
+            get_image(RPI_ID)
+
+        except Exception as e: 
+            print(e)
+            print("Having trouble when dealing with data of ", sponsor["sponsor_name"], " from ", org["org_name"])
+            continue
 
 
-
-
-
-
+    # Write the whole work hist of this org
+    org_file_name = oeg["org_name"] + "_detailed.txt"
+    with open (org_file_name, "w", encoding = "utf-8") as org_hist_out: 
+        json.dump(work_hist, org_hist_out, ensure_ascii = False)
 
 
