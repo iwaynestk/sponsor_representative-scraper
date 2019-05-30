@@ -1,3 +1,6 @@
+# This function would only go once. 
+# All the exceptions would be recorded in the file "exception.xlsx"
+# You may run the script "deal_exception.xlsx" to fetch the img, info and work history of sponsors we missed. 
 import json
 import urllib.request
 from urllib import parse
@@ -6,7 +9,7 @@ from time import sleep
 import pandas as pd
 
 
-
+# Headers settings for all requests command. 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36", 
     "Content-Type": "application/x-www-form-urlencoded", 
@@ -16,7 +19,9 @@ headers = {
     "X-Requested-With": "XMLHttpRequest"
 }
 
-
+#####################################
+# These are proxy settings. They will expire after 20/05/2019. 
+# If you want to use similar proxy settings, you should change proxy server and tunnel settings. 
 # Proxy server
 proxyHost = "http-dyn.abuyun.com"
 proxyPort = "9020"
@@ -36,10 +41,11 @@ proxies = {
     "http"  : proxyMeta,
     "https" : proxyMeta,
 }
+# End of proxy settings
+#####################################
 
 
-
-
+# This function get the number of pages for an org based on the number of sponsors listed. 
 def get_nu_of_pages(nu_sponsor):
     if (nu_sponsor % 100 == 0): 
         nu_of_pages = nu_sponsor / 100
@@ -48,7 +54,8 @@ def get_nu_of_pages(nu_sponsor):
     return nu_of_pages
 
 
-
+# This function would return a list of all the sponsors in the same org with their basic info
+# such as name, certificate ...
 def get_info_of_org(org_info): 
 
     org_url = "http://exam.sac.net.cn/pages/registration/train-line-register!list.action"
@@ -94,6 +101,8 @@ def get_info_of_org(org_info):
     return org_list
 
 
+# This function would return the RPI ID of a sponsor
+# RPI ID is used to fetch the detailed info of a sponsor. 
 def get_RPI_ID(sponsor_info): 
 
     sponsor_post_data_PPP = {
@@ -109,6 +118,7 @@ def get_RPI_ID(sponsor_info):
     return RPI_ID
 
 
+# This function would return the work history table of a sponsor. 
 def get_hist_table(RPI_ID, sponsor_name):
 
     sponsor_post_data_RPI = {
@@ -125,6 +135,8 @@ def get_hist_table(RPI_ID, sponsor_name):
 
     return sponsor_history_data
 
+
+# This function would get the image of a sponsor based on his RPI ID. 
 def get_image(RPI_ID):  
 
     image_post_data = {
@@ -185,11 +197,9 @@ if __name__ == "__main__":
             print("Getting information of org ", org["org_name"], " failed. Moving on to the next one. ")
             continue
 
-
         work_hist = []
 
         for sponsor in sponsors: 
-
             try: 
                 RPI_ID = get_RPI_ID(sponsor)
                 print("Checking out sponsor: ", sponsor["sponsor_name"], " RPI_ID: ", RPI_ID)
@@ -209,6 +219,7 @@ if __name__ == "__main__":
         df_org_detailed = pd.DataFrame(work_hist)
         df_org_detailed.to_excel(file_org_detailed, index = False)
 
+    # Write all the exceptions into a single file
     df_exception = pd.DataFrame(exception_list)
     df_exception.to_excel("exception.xlsx", index = False)
 

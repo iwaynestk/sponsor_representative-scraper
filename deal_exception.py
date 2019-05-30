@@ -1,9 +1,12 @@
+# Run this script after you have run "main.py"
+# It would fetch the info and imgs we missed out
+
 import json
 import requests
 import pandas as pd
 import urllib.request
 
-
+# Headers settings for all requests command. 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36", 
     "Content-Type": "application/x-www-form-urlencoded", 
@@ -13,7 +16,9 @@ headers = {
     "X-Requested-With": "XMLHttpRequest"
 }
 
-
+#####################################
+# These are proxy settings. They will expire after 20/05/2019. 
+# If you want to use similar proxy settings, you should change proxy server and tunnel settings. 
 # Proxy server
 proxyHost = "http-dyn.abuyun.com"
 proxyPort = "9020"
@@ -32,10 +37,13 @@ proxies = {
     "http"  : proxyMeta,
     "https" : proxyMeta,
 }
+# End of proxy settings
+#####################################
 
 
 
-
+# This function would return the RPI ID of a sponsor
+# RPI ID is used to fetch the detailed info of a sponsor.
 def get_RPI_ID(PPP_ID): 
 
     sponsor_post_data_PPP = {
@@ -50,7 +58,7 @@ def get_RPI_ID(PPP_ID):
 
     return RPI_ID
 
-
+# This function would get the image of a sponsor based on his RPI ID. 
 def get_image(RPI_ID):  
 
     image_post_data = {
@@ -68,6 +76,7 @@ def get_image(RPI_ID):
     urllib.request.urlretrieve(image_url, image_name)
 
 
+# This function would return the work history table of a sponsor. 
 def get_hist_table(RPI_ID, sponsor_name):
 
     sponsor_post_data_RPI = {
@@ -85,15 +94,19 @@ def get_hist_table(RPI_ID, sponsor_name):
     return sponsor_history_data
 
 
+# Read all the exceptions and we only take two columns. 
+# They are "sponsor_PPP_ID" and "sponsor_name"
 df_exception = pd.read_excel("exception.xlsx")
 df_exception_seg = df_exception[["sponsor_PPP_ID", "sponsor_name"]]
 exception_list = df_exception_seg.to_dict(orient = "records")
 
+# PPP_ID_list would be used to fetched a list of RPI ID
 PPP_ID_list = df_exception["sponsor_PPP_ID"].tolist()
 
 RPI_ID_list = []
 PPP_ID_list_copy = PPP_ID_list
 
+# We would keep looping until all the RPI IDs are fetched. 
 while True: 
     for PPP_ID in PPP_ID_list: 
         try: 
@@ -116,8 +129,9 @@ df_RPI.to_excel("RPI_exception.xlsx", index = False)
 
 RPI_ID_list_copy_image = RPI_ID_list
 
-# image
- 
+# Fetch all the images. 
+# Sometimes the image may not exist. WHen it happens, there would be some exception about connection. 
+# We would then directly go to the next loop. 
 for RPI_ID in RPI_ID_list: 
     try: 
         get_image(RPI_ID)
@@ -126,13 +140,12 @@ for RPI_ID in RPI_ID_list:
     except: 
         print("Unable to fetch image of RPI ID: ", RPI_ID)
         continue
-    
 print("All images fetched! ")
 
 
-
+# Now fetch the work history
+# Keep looping until all the work hist info is fetched. 
 print("Starting: fetch work history info")
-# work hist
 work_hist = []
 exception_list_copy = exception_list
 while True: 
